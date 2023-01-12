@@ -1,5 +1,6 @@
 package br.com.elegacy.libraryapi.api.resource;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,27 +17,20 @@ import br.com.elegacy.libraryapi.service.BookService;
 public class BookController {
 
 	private BookService bookService;
+	private ModelMapper modelMapper;
 
-	public BookController(BookService bookService) {
+	public BookController(BookService bookService, ModelMapper modelMapper) {
 		this.bookService = bookService;
+		this.modelMapper = modelMapper;
 	}
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public BookDTO create(@RequestBody BookDTO bookDTO) {
-		Book book = Book.builder()
-				.author(bookDTO.getAuthor())
-				.title(bookDTO.getTitle())
-				.isbn(bookDTO.getIsbn())
-				.build();
+		Book book = modelMapper.map(bookDTO, Book.class);
 
 		book = bookService.save(book);
 		
-		return BookDTO.builder()
-				.id(book.getId())
-				.author(book.getAuthor())
-				.title(book.getTitle())
-				.isbn(book.getIsbn())
-				.build();
+		return modelMapper.map(book, BookDTO.class);
 	}
 }
