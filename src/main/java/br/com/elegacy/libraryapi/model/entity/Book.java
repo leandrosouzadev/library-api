@@ -1,4 +1,4 @@
-package br.com.elegacy.libraryapi.api.resource.dto;
+package br.com.elegacy.libraryapi.model.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookDTO {
+public class Book {
 
 	private Long id;
 	private String title;
