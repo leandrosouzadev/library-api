@@ -1,7 +1,5 @@
 package br.com.elegacy.libraryapi.api.resource;
 
-import java.util.Optional;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -13,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import br.com.elegacy.libraryapi.api.exception.ApiErrors;
 import br.com.elegacy.libraryapi.api.resource.dto.BookDTO;
@@ -44,16 +43,11 @@ public class BookController {
 	}
 
 	@GetMapping("{id}")
-	// @ResponseStatus(HttpStatus.)
 	public BookDTO get(@PathVariable Long id) {
-		Optional<Book> savedBook = bookService.getById(id);
-		BookDTO bookDTO = null;
-		
-		if (savedBook.isPresent()) {
-			bookDTO = modelMapper.map(savedBook.get(), BookDTO.class);
-		}
-
-		return bookDTO;
+		return bookService
+				.getById(id)
+				.map(book -> modelMapper.map(book, BookDTO.class))
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));		
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
