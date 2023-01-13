@@ -1,9 +1,13 @@
 package br.com.elegacy.libraryapi.api.resource;
 
+import java.util.Optional;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,18 +40,31 @@ public class BookController {
 
 		book = bookService.save(book);
 
-		return modelMapper.map(book, BookDTO.class);		
+		return modelMapper.map(book, BookDTO.class);
 	}
-	
+
+	@GetMapping("{id}")
+	// @ResponseStatus(HttpStatus.)
+	public BookDTO get(@PathVariable Long id) {
+		Optional<Book> savedBook = bookService.getById(id);
+		BookDTO bookDTO = null;
+		
+		if (savedBook.isPresent()) {
+			bookDTO = modelMapper.map(savedBook.get(), BookDTO.class);
+		}
+
+		return bookDTO;
+	}
+
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ApiErrors handleValidationExceptions(MethodArgumentNotValidException ex) {			
+	public ApiErrors handleValidationExceptions(MethodArgumentNotValidException ex) {
 		return new ApiErrors(ex.getBindingResult());
 	}
-	
+
 	@ExceptionHandler(BusinessException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ApiErrors handleBusinessException(BusinessException ex) {			
+	public ApiErrors handleBusinessException(BusinessException ex) {
 		return new ApiErrors(ex);
 	}
 }

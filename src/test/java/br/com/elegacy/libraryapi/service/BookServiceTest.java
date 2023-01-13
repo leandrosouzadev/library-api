@@ -19,7 +19,7 @@ import br.com.elegacy.libraryapi.service.impl.BookServiceImpl;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
-class BookSserviceTest {
+class BookServiceTest {
 
 	private BookService bookService;
 

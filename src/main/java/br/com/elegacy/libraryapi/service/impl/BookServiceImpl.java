@@ -1,5 +1,7 @@
 package br.com.elegacy.libraryapi.service.impl;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import br.com.elegacy.libraryapi.exception.BusinessException;
@@ -23,6 +25,12 @@ public class BookServiceImpl implements BookService {
 		}
 		
 		return bookRepository.save(book);
+	}
+
+	@Override
+	public Optional<Book> getById(Long id) {
+		// TODO Auto-generated method stub
+		return Optional.empty();
 	}
 
 }
