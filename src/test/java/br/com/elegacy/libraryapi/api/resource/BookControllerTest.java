@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.elegacy.libraryapi.api.resource.dto.BookDTO;
+import br.com.elegacy.libraryapi.exception.BusinessException;
 import br.com.elegacy.libraryapi.model.entity.Book;
 import br.com.elegacy.libraryapi.service.BookService;
 
@@ -40,12 +41,7 @@ class BookControllerTest {
 	@Test
 	@DisplayName("Should create a successful book.")
 	void shouldCreateBook() throws Exception {
-		BookDTO bookDTO = BookDTO
-				.builder()
-				.author("Arthur")
-				.title("As aventuras")
-				.isbn("001")
-				.build();
+		BookDTO bookDTO = createNewBookDTO();
 
 		Book savedBook = Book
 				.builder()
@@ -86,7 +82,39 @@ class BookControllerTest {
 
 		mockMvc.perform(request)
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("errors" , Matchers.hasSize(3)));
+				.andExpect(jsonPath("errors", Matchers.hasSize(3)));
 	}
 
+	@Test
+	@DisplayName("Shouldn't create a book with duplicate isbn.")
+	void shouldNotCreateBookWithDuplicateIsbn() throws Exception {
+		BookDTO bookDTO = createNewBookDTO();
+		String json = new ObjectMapper().writeValueAsString(bookDTO);
+		String errorMessage = "Isbn already registered";
+
+		BDDMockito.given(bookService.save(Mockito.any(Book.class)))
+				.willThrow(new BusinessException(errorMessage));
+
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+				.post(BOOK_API)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.content(json);
+
+		mockMvc.perform(request)
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("errors", Matchers.hasSize(1)))
+				.andExpect(jsonPath("errors[0]").value(errorMessage));
+	}
+
+	private BookDTO createNewBookDTO() {
+		BookDTO bookDTO = BookDTO
+				.builder()
+				.author("Arthur")
+				.title("As aventuras")
+				.isbn("001")
+				.build();
+
+		return bookDTO;
+	}
 }

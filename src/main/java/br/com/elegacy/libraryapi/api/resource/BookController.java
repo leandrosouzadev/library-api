@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.elegacy.libraryapi.api.exception.ApiErrors;
 import br.com.elegacy.libraryapi.api.resource.dto.BookDTO;
+import br.com.elegacy.libraryapi.exception.BusinessException;
 import br.com.elegacy.libraryapi.model.entity.Book;
 import br.com.elegacy.libraryapi.service.BookService;
 import jakarta.validation.Valid;
@@ -42,5 +43,11 @@ public class BookController {
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ApiErrors handleValidationExceptions(MethodArgumentNotValidException ex) {			
 		return new ApiErrors(ex.getBindingResult());
+	}
+	
+	@ExceptionHandler(BusinessException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ApiErrors handleBusinessException(BusinessException ex) {			
+		return new ApiErrors(ex);
 	}
 }
