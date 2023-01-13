@@ -3,6 +3,7 @@ package br.com.elegacy.libraryapi.api.resource;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
@@ -32,7 +33,7 @@ class BookControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
-	
+
 	@MockBean
 	private BookService bookService;
 
@@ -45,7 +46,7 @@ class BookControllerTest {
 				.title("As aventuras")
 				.isbn("001")
 				.build();
-		
+
 		Book savedBook = Book
 				.builder()
 				.id(10l)
@@ -53,9 +54,8 @@ class BookControllerTest {
 				.title("As aventuras")
 				.isbn("001")
 				.build();
-		
+
 		BDDMockito.given(bookService.save(Mockito.any(Book.class))).willReturn(savedBook);
-		
 
 		String json = new ObjectMapper().writeValueAsString(bookDTO);
 
@@ -75,8 +75,18 @@ class BookControllerTest {
 
 	@Test
 	@DisplayName("Shouldn't create an invalid book.")
-	void shouldNotCreateInvalidBook() {
+	void shouldNotCreateInvalidBook() throws Exception {
+		String json = new ObjectMapper().writeValueAsString(new BookDTO());
 
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+				.post(BOOK_API)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.content(json);
+
+		mockMvc.perform(request)
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("errors" , Matchers.hasSize(3)));
 	}
 
 }
