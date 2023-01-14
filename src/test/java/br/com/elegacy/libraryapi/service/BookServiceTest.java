@@ -138,8 +138,43 @@ class BookServiceTest {
 		// Act
 		assertThrows(IllegalArgumentException.class, () -> bookService.delete(book));				
 		
-		// Assert		
+		// Assert
 		Mockito.verify(bookRepository, Mockito.never()).delete(book);
+	}
+	
+	@Test
+	@DisplayName("Should delete a book.")
+	void shouldUpdateBook() {
+		// Arrange
+		Long id = 1L;
+		Book updatingBook = Book.builder().id(id).build();
+		
+		Book updatedBook = createValidBook();
+		updatedBook.setId(id);
+		
+		Mockito.when(bookRepository.save(updatingBook)).thenReturn(updatedBook);
+		
+		// Act		
+		Book book = bookService.update(updatingBook);		
+		
+		// Assert
+		assertThat(book.getId()).isEqualTo(updatedBook.getId());
+		assertThat(book.getTitle()).isEqualTo(updatedBook.getTitle());
+		assertThat(book.getIsbn()).isEqualTo(updatedBook.getIsbn());
+		assertThat(book.getAuthor()).isEqualTo(updatedBook.getAuthor());
+	}
+	
+	@Test
+	@DisplayName("Should throw exception when updating a non-existent book.")
+	void shouldThrowExceptionWhenUpdatingNonExistentBook() {
+		// Arrange
+		Book book = new Book();
+		
+		// Act
+		assertThrows(IllegalArgumentException.class, () -> bookService.update(book));				
+		
+		// Assert
+		Mockito.verify(bookRepository, Mockito.never()).save(book);
 	}
 
 	private Book createValidBook() {
