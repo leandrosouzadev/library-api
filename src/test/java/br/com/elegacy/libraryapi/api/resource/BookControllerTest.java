@@ -165,21 +165,83 @@ class BookControllerTest {
 		mockMvc.perform(request)
 				.andExpect(status().isNoContent());
 	}
-	
+
 	@Test
 	@DisplayName("Should return resource not found when there is no book to delete.")
 	void shouldReturnNotFoundWhenThereIsNoBookDelete() throws Exception {
 		// Given
 		BDDMockito.given(bookService.getById(Mockito.anyLong())).willReturn(Optional.empty());
-		
+
 		// When
 		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
 				.delete(BOOK_API.concat("/").concat("1"))
 				.accept(MediaType.APPLICATION_JSON);
-		
+
 		// Then
 		mockMvc.perform(request)
-		.andExpect(status().isNotFound());
+				.andExpect(status().isNotFound());
+	}
+
+	@Test
+	@DisplayName("Should update a book.")
+	void shouldUpdateBook() throws Exception {
+		// Given
+		Long id = 1L;
+		String json = new ObjectMapper().writeValueAsString(createNewBook());
+		Book updatingBook = Book.builder()
+				.id(1L)
+				.title("Same title")
+				.author("Some author")
+				.isbn("321")
+				.build();
+		
+		Book updatedBook = Book.builder()
+				.id(id)
+				.author("Arthur")
+				.title("As aventuras")
+				.isbn("001")
+				.build();
+		//System.out.println("Antes: " + updatingBook.getAuthor());
+
+		BDDMockito.given(bookService.getById(id)).willReturn(Optional.of(updatingBook));	
+		BDDMockito.given(bookService.update(updatingBook)).willReturn(updatedBook);
+
+		// When
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+				.put(BOOK_API.concat("/").concat("1"))
+				.content(json)
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON);
+
+		// Then
+		mockMvc.perform(request)
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("id").value(id))
+				.andExpect(jsonPath("title").value(createNewBook().getTitle()))
+				.andExpect(jsonPath("author").value(createNewBook().getAuthor()))
+				.andExpect(jsonPath("isbn").value(createNewBook().getIsbn()));
+	}
+
+	@Test
+	@DisplayName("Should return resource not found when there is no book to update.")
+	void shouldReturnNotFoundWhenThereIsNotBookUpdate() throws Exception {
+		// Given
+		String json = new ObjectMapper().writeValueAsString(createNewBook());
+
+		BDDMockito
+				.given(bookService.getById(Mockito.anyLong()))
+				.willReturn(Optional.empty());
+
+		// When
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+				.put(BOOK_API.concat("/").concat("1"))
+				.content(json)
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON);
+
+		// Then
+		mockMvc.perform(request)
+				.andExpect(status().isNotFound());
 	}
 
 	private Book createNewBook() {
