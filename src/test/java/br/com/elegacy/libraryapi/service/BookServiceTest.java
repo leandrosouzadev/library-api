@@ -1,6 +1,8 @@
 package br.com.elegacy.libraryapi.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Optional;
 
@@ -111,7 +113,33 @@ class BookServiceTest {
 		Optional<Book> foundBook = bookService.getById(id);
 
 		// Asssert
-		assertThat(foundBook).isEmpty();		
+		assertThat(foundBook).isEmpty();
+	}
+
+	@Test
+	@DisplayName("Should delete a book.")
+	void shouldDeleteBook() {
+		// Arrange
+		Book book = Book.builder().id(1L).build();
+		
+		// Act
+		assertDoesNotThrow(() -> bookService.delete(book));		
+
+		// Assert
+		Mockito.verify(bookRepository, Mockito.times(1)).delete(book);
+	}
+	
+	@Test
+	@DisplayName("Should throw exception when deleting a non-existent book.")
+	void shouldThrowExceptionWhenDeletingNonExistentBook() {
+		// Arrange
+		Book book = new Book();
+		
+		// Act
+		assertThrows(IllegalArgumentException.class, () -> bookService.delete(book));				
+		
+		// Assert		
+		Mockito.verify(bookRepository, Mockito.never()).delete(book);
 	}
 
 	private Book createValidBook() {
