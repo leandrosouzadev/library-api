@@ -2,6 +2,8 @@ package br.com.elegacy.libraryapi.model.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +29,7 @@ class BookRepositoryTest {
 		// Arrange		
 		String isbn = "123";
 		
-		Book book = Book
-				.builder()
-				.isbn(isbn)
-				.author("Fulano")
-				.title("As aventuras")
-				.build();
+		Book book = createNewBook(isbn);
 		
 		testEntityManager.persist(book);
 		
@@ -54,5 +51,29 @@ class BookRepositoryTest {
 		
 		// Assert
 		assertThat(exists).isFalse();
+	}
+	
+	@Test
+	@DisplayName("Should get a book by id.")
+	void shouldGetBookById() {
+		// Arrange
+		Book book = createNewBook("123");
+		testEntityManager.persist(book);
+		
+		// Act
+		Optional<Book> foundBook = bookRepository.findById(book.getId());
+		
+		// Assert
+		assertThat(foundBook).isPresent();		
+	}
+	
+	private Book createNewBook(String isbn) {
+		Book book = Book
+				.builder()
+				.isbn(isbn)
+				.author("Fulano")
+				.title("As aventuras")
+				.build();
+		return book;
 	}
 }
