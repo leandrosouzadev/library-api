@@ -2,6 +2,8 @@ package br.com.elegacy.libraryapi.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Optional;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -74,6 +76,42 @@ class BookServiceTest {
 				.hasMessage("Isbn already registered");
 
 		Mockito.verify(bookRepository, Mockito.never()).save(book);
+	}
+
+	@Test
+	@DisplayName("Should get a book by id.")
+	void shouldGetBookById() {
+		// Arrange
+		Long id = 1L;
+		Book book = createValidBook();
+		book.setId(id);
+
+		Mockito.when(bookRepository.findById(id)).thenReturn(Optional.of(book));
+
+		// Act
+		Optional<Book> foundBook = bookService.getById(id);
+
+		// Asssert
+		assertThat(foundBook).isPresent();
+		assertThat(foundBook.get().getId()).isEqualTo(id);
+		assertThat(foundBook.get().getAuthor()).isEqualTo(book.getAuthor());
+		assertThat(foundBook.get().getIsbn()).isEqualTo(book.getIsbn());
+		assertThat(foundBook.get().getTitle()).isEqualTo(book.getTitle());
+	}
+
+	@Test
+	@DisplayName("Should return empty when book id does not exist.")
+	void shouldReturnEmptyWhenBookIdDoesNotExist() {
+		// Arrange
+		Long id = 1L;
+
+		Mockito.when(bookRepository.findById(id)).thenReturn(Optional.empty());
+
+		// Act
+		Optional<Book> foundBook = bookService.getById(id);
+
+		// Asssert
+		assertThat(foundBook).isEmpty();		
 	}
 
 	private Book createValidBook() {

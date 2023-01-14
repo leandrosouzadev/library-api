@@ -201,7 +201,6 @@ class BookControllerTest {
 				.title("As aventuras")
 				.isbn("001")
 				.build();
-		//System.out.println("Antes: " + updatingBook.getAuthor());
 
 		BDDMockito.given(bookService.getById(id)).willReturn(Optional.of(updatingBook));	
 		BDDMockito.given(bookService.update(updatingBook)).willReturn(updatedBook);
