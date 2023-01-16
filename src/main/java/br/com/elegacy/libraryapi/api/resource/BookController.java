@@ -1,6 +1,12 @@
 package br.com.elegacy.libraryapi.api.resource;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -66,7 +72,7 @@ public class BookController {
 	public BookDTO update(@PathVariable Long id, @RequestBody BookDTO bookDTO) {
 		return bookService
 				.getById(id).map(book -> {
-					
+
 					book.setAuthor(bookDTO.getAuthor());
 					book.setTitle(bookDTO.getTitle());
 					book.setIsbn(bookDTO.getIsbn());
@@ -76,6 +82,19 @@ public class BookController {
 					return modelMapper.map(book, BookDTO.class);
 				})
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+	}
+
+	@GetMapping
+	public Page<BookDTO> find(BookDTO bookDTO, Pageable pageRequest) {
+		Book filter = modelMapper.map(bookDTO, Book.class);
+		Page<Book> result = bookService.find(filter, pageRequest);
+
+		List<BookDTO> books = result.getContent()
+				.stream()
+				.map(entity -> modelMapper.map(entity, BookDTO.class))
+				.collect(Collectors.toList());
+		
+		return new PageImpl<BookDTO>(books, pageRequest, result.getTotalElements());
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)

@@ -1,9 +1,9 @@
 package br.com.elegacy.libraryapi.service;
 
-import java.awt.print.Pageable;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import br.com.elegacy.libraryapi.model.entity.Book;
 
