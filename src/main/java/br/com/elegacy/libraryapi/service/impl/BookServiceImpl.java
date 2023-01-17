@@ -1,8 +1,9 @@
 package br.com.elegacy.libraryapi.service.impl;
 
-
 import java.util.Optional;
 
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,7 @@ public class BookServiceImpl implements BookService {
 		if (bookRepository.existsByIsbn(book.getIsbn())) {
 			throw new BusinessException("Isbn already registered");
 		}
-		
+
 		return bookRepository.save(book);
 	}
 
@@ -37,27 +38,33 @@ public class BookServiceImpl implements BookService {
 
 	@Override
 	public void delete(Book book) {
-		if(book == null || book.getId() == null) {
+		if (book == null || book.getId() == null) {
 			throw new IllegalArgumentException("Book id cant be null");
 		}
-		
+
 		this.bookRepository.delete(book);
-		
+
 	}
 
 	@Override
 	public Book update(Book book) {
-		if(book == null || book.getId() == null) {
+		if (book == null || book.getId() == null) {
 			throw new IllegalArgumentException("Book id cant be null");
 		}
-		
+
 		return this.bookRepository.save(book);
 	}
 
 	@Override
 	public Page<Book> find(Book filter, Pageable pageRequest) {
-		// TODO Auto-generated method stub
-		return null;
+		Example<Book> example = Example.of(filter,
+				ExampleMatcher
+						.matching()
+						.withIgnoreCase()
+						.withIgnoreNullValues()
+						.withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING));
+
+		return bookRepository.findAll(example, pageRequest);
 	}
 
 }

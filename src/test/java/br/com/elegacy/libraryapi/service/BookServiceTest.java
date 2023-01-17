@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
@@ -13,6 +15,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -121,60 +127,82 @@ class BookServiceTest {
 	void shouldDeleteBook() {
 		// Arrange
 		Book book = Book.builder().id(1L).build();
-		
+
 		// Act
-		assertDoesNotThrow(() -> bookService.delete(book));		
+		assertDoesNotThrow(() -> bookService.delete(book));
 
 		// Assert
 		Mockito.verify(bookRepository, Mockito.times(1)).delete(book);
 	}
-	
+
 	@Test
 	@DisplayName("Should throw exception when deleting a non-existent book.")
 	void shouldThrowExceptionWhenDeletingNonExistentBook() {
 		// Arrange
 		Book book = new Book();
-		
+
 		// Act
-		assertThrows(IllegalArgumentException.class, () -> bookService.delete(book));				
-		
+		assertThrows(IllegalArgumentException.class, () -> bookService.delete(book));
+
 		// Assert
 		Mockito.verify(bookRepository, Mockito.never()).delete(book);
 	}
-	
+
 	@Test
 	@DisplayName("Should delete a book.")
 	void shouldUpdateBook() {
 		// Arrange
 		Long id = 1L;
 		Book updatingBook = Book.builder().id(id).build();
-		
+
 		Book updatedBook = createValidBook();
 		updatedBook.setId(id);
-		
+
 		Mockito.when(bookRepository.save(updatingBook)).thenReturn(updatedBook);
-		
-		// Act		
-		Book book = bookService.update(updatingBook);		
-		
+
+		// Act
+		Book book = bookService.update(updatingBook);
+
 		// Assert
 		assertThat(book.getId()).isEqualTo(updatedBook.getId());
 		assertThat(book.getTitle()).isEqualTo(updatedBook.getTitle());
 		assertThat(book.getIsbn()).isEqualTo(updatedBook.getIsbn());
 		assertThat(book.getAuthor()).isEqualTo(updatedBook.getAuthor());
 	}
-	
+
 	@Test
 	@DisplayName("Should throw exception when updating a non-existent book.")
 	void shouldThrowExceptionWhenUpdatingNonExistentBook() {
 		// Arrange
 		Book book = new Book();
-		
+
 		// Act
-		assertThrows(IllegalArgumentException.class, () -> bookService.update(book));				
-		
+		assertThrows(IllegalArgumentException.class, () -> bookService.update(book));
+
 		// Assert
 		Mockito.verify(bookRepository, Mockito.never()).save(book);
+	}
+
+	@Test
+	@DisplayName("Should find by filter")
+	void shouldFindByFilter() {
+		// Arrange
+		Book book = createValidBook();
+		PageRequest pageRequest = PageRequest.of(0, 10);
+		List<Book> books = Arrays.asList(book);
+		
+		Page<Book> page = new PageImpl<Book>(books, pageRequest, 1);
+		Mockito.when(bookRepository.findAll(Mockito.<Example<Book>>any(), Mockito.any(PageRequest.class)))
+				.thenReturn(page);
+
+		// Act
+		Page<Book> result = bookService.find(book, pageRequest);
+
+		// Assert
+		assertThat(result.getTotalElements()).isEqualTo(1);
+		assertThat(result.getContent()).isEqualTo(books);
+		assertThat(result.getPageable().getPageNumber()).isZero();
+		assertThat(result.getPageable().getPageSize()).isEqualTo(10);
 	}
 
 	private Book createValidBook() {
