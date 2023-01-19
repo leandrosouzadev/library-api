@@ -112,8 +112,8 @@ class LoanControllerTest {
 		// Then
 		mockMvc.perform(request)
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("erros", Matchers.hasSize(1)))
-				.andExpect(jsonPath("erros[0]").value("Book not found by informed isbn."));
+				.andExpect(jsonPath("errors", Matchers.hasSize(1)))
+				.andExpect(jsonPath("errors[0]").value("Book not found by informed isbn."));
 	}
 
 }

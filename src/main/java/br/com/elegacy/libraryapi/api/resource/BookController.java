@@ -1,16 +1,13 @@
 package br.com.elegacy.libraryapi.api.resource;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,8 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import br.com.elegacy.libraryapi.api.dto.BookDTO;
-import br.com.elegacy.libraryapi.api.exception.ApiErrors;
-import br.com.elegacy.libraryapi.exception.BusinessException;
 import br.com.elegacy.libraryapi.model.entity.Book;
 import br.com.elegacy.libraryapi.service.BookService;
 import jakarta.validation.Valid;
@@ -92,20 +87,8 @@ public class BookController {
 		List<BookDTO> books = result.getContent()
 				.stream()
 				.map(entity -> modelMapper.map(entity, BookDTO.class))
-				.collect(Collectors.toList());
+				.toList();
 		
-		return new PageImpl<BookDTO>(books, pageRequest, result.getTotalElements());
-	}
-
-	@ExceptionHandler(MethodArgumentNotValidException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ApiErrors handleValidationExceptions(MethodArgumentNotValidException ex) {
-		return new ApiErrors(ex.getBindingResult());
-	}
-
-	@ExceptionHandler(BusinessException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ApiErrors handleBusinessException(BusinessException ex) {
-		return new ApiErrors(ex);
+		return new PageImpl<>(books, pageRequest, result.getTotalElements());
 	}
 }
