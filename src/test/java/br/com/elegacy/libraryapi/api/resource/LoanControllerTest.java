@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.elegacy.libraryapi.api.dto.LoanDTO;
+import br.com.elegacy.libraryapi.exception.BusinessException;
 import br.com.elegacy.libraryapi.model.entity.Book;
 import br.com.elegacy.libraryapi.model.entity.Loan;
 import br.com.elegacy.libraryapi.service.BookService;
@@ -85,9 +86,9 @@ class LoanControllerTest {
 		mockMvc.perform(request)
 				.andExpect(status().isCreated())
 				.andExpect(content().string("1"));
-				//.andDo(MockMvcResultHandlers.print());
+		// .andDo(MockMvcResultHandlers.print());
 	}
-	
+
 	@Test
 	@DisplayName("Should not create a loan with non-existent isbn")
 	void shouldNotCreateLoanWithNonExistentIsbn() throws Exception {
@@ -98,10 +99,10 @@ class LoanControllerTest {
 				.build();
 
 		String json = new ObjectMapper().writeValueAsString(loanDTO);
-		
+
 		BDDMockito.given(bookService.getBookByIsbn("123"))
-		.willReturn(Optional.empty());
-		
+				.willReturn(Optional.empty());
+
 		// When
 		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
 				.post(LOAN_API)
@@ -114,6 +115,42 @@ class LoanControllerTest {
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("errors", Matchers.hasSize(1)))
 				.andExpect(jsonPath("errors[0]").value("Book not found by informed isbn."));
+	}
+
+	@Test
+	@DisplayName("Should not lend an unreturned book")
+	void shouldNotLendAnUnreturnedBook() throws Exception {
+		// Given
+		LoanDTO loanDTO = LoanDTO.builder()
+				.isbn("123")
+				.customer("Jhon")
+				.build();
+
+		String json = new ObjectMapper().writeValueAsString(loanDTO);
+
+		Book book = Book.builder()
+				.id(1L)
+				.isbn("123")
+				.build();
+
+		BDDMockito.given(bookService.getBookByIsbn("123"))
+				.willReturn(Optional.of(book));
+
+		BDDMockito.given(loanService.save(Mockito.any(Loan.class)))
+				.willThrow(new BusinessException("Book already loaned."));
+
+		// When
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+				.post(LOAN_API)
+				.content(json)
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON);
+
+		// Then
+		mockMvc.perform(request)
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("errors", Matchers.hasSize(1)))
+				.andExpect(jsonPath("errors[0]").value("Book already loaned."));
 	}
 
 }
