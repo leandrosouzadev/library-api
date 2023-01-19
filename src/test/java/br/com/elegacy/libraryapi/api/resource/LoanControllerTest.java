@@ -1,5 +1,6 @@
 package br.com.elegacy.libraryapi.api.resource;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -17,8 +18,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -54,27 +57,27 @@ class LoanControllerTest {
 				.build();
 
 		String json = new ObjectMapper().writeValueAsString(loanDTO);
-		
+
 		Book book = Book.builder()
 				.id(1L)
 				.isbn("123")
 				.build();
-		
+
 		BDDMockito.given(bookService.getBookByIsbn("123"))
 				.willReturn(Optional.of(book));
-		
+
 		Loan loan = Loan.builder()
 				.id(1L)
 				.customer("Jhon")
 				.book(book)
 				.loanDate(LocalDate.now())
 				.build();
-		
+
 		BDDMockito.given(loanService.save(Mockito.any(Loan.class))).willReturn(loan);
 
 		// When
 		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
-				.put(LOAN_API)
+				.post(LOAN_API)
 				.content(json)
 				.accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON);
@@ -82,7 +85,8 @@ class LoanControllerTest {
 		// Then
 		mockMvc.perform(request)
 				.andExpect(status().isCreated())
-				.andExpect(jsonPath("id").value(1L));
+				.andExpect(content().string("1"));
+				//.andDo(MockMvcResultHandlers.print());
 	}
 
 }
