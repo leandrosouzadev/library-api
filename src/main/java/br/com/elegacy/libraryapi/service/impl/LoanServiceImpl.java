@@ -1,5 +1,6 @@
 package br.com.elegacy.libraryapi.service.impl;
 
+import br.com.elegacy.libraryapi.exception.BusinessException;
 import br.com.elegacy.libraryapi.model.entity.Loan;
 import br.com.elegacy.libraryapi.model.repository.LoanRepository;
 import br.com.elegacy.libraryapi.service.LoanService;
@@ -14,6 +15,10 @@ public class LoanServiceImpl implements LoanService {
 
 	@Override
 	public Loan save(Loan loan) {
+		if (loanRepository.existsByBookAndNotReturned(loan.getBook())) {
+			throw new BusinessException("Book already loaned.");
+		}
+
 		return this.loanRepository.save(loan);
 	}
 
