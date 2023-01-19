@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDate;
 import java.util.Optional;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
@@ -18,10 +19,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -87,6 +86,34 @@ class LoanControllerTest {
 				.andExpect(status().isCreated())
 				.andExpect(content().string("1"));
 				//.andDo(MockMvcResultHandlers.print());
+	}
+	
+	@Test
+	@DisplayName("Should not create a loan with non-existent isbn")
+	void shouldNotCreateLoanWithNonExistentIsbn() throws Exception {
+		// Given
+		LoanDTO loanDTO = LoanDTO.builder()
+				.isbn("123")
+				.customer("Jhon")
+				.build();
+
+		String json = new ObjectMapper().writeValueAsString(loanDTO);
+		
+		BDDMockito.given(bookService.getBookByIsbn("123"))
+		.willReturn(Optional.empty());
+		
+		// When
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+				.post(LOAN_API)
+				.content(json)
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON);
+
+		// Then
+		mockMvc.perform(request)
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("erros", Matchers.hasSize(1)))
+				.andExpect(jsonPath("erros[0]").value("Book not found by informed isbn."));
 	}
 
 }
