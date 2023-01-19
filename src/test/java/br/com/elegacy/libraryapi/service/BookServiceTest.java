@@ -3,6 +3,8 @@ package br.com.elegacy.libraryapi.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.Arrays;
 import java.util.List;
@@ -190,7 +192,7 @@ class BookServiceTest {
 		Book book = createValidBook();
 		PageRequest pageRequest = PageRequest.of(0, 10);
 		List<Book> books = Arrays.asList(book);
-		
+
 		Page<Book> page = new PageImpl<Book>(books, pageRequest, 1);
 		Mockito.when(bookRepository.findAll(Mockito.<Example<Book>>any(), Mockito.any(PageRequest.class)))
 				.thenReturn(page);
@@ -203,6 +205,29 @@ class BookServiceTest {
 		assertThat(result.getContent()).isEqualTo(books);
 		assertThat(result.getPageable().getPageNumber()).isZero();
 		assertThat(result.getPageable().getPageSize()).isEqualTo(10);
+	}
+
+	@Test
+	@DisplayName("Should get a book by isbn")
+	void shouldGetBookByIsbn() {
+		// Arrange
+		String isbn = "1230";		
+		Book book = Book.builder()
+				.id(1L)
+				.isbn(isbn)
+				.build();
+
+		Mockito.when(bookRepository.findByIsbn(isbn)).thenReturn(Optional.of(book));
+		
+		// Act
+		Optional<Book> foundBook = bookService.getBookByIsbn(isbn);
+
+		// Assert
+		assertThat(foundBook).isPresent();
+		assertThat(foundBook.get().getId()).isEqualTo(1L);
+		assertThat(foundBook.get().getIsbn()).isEqualTo(isbn);
+		
+		verify(bookRepository, times(1)).findByIsbn(isbn);
 	}
 
 	private Book createValidBook() {

@@ -64,13 +64,12 @@ public class BookServiceImpl implements BookService {
 						.withIgnoreNullValues()
 						.withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING));
 
-		return bookRepository.findAll(example, pageRequest);
+		return this.bookRepository.findAll(example, pageRequest);
 	}
 
 	@Override
-	public Optional<Book> getBookByIsbn(String isbn) {
-		// TODO Auto-generated method stub
-		return Optional.empty();
+	public Optional<Book> getBookByIsbn(String isbn) {	
+		return this.bookRepository.findByIsbn(isbn);
 	}
 
 }
