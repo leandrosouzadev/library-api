@@ -21,8 +21,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import br.com.elegacy.libraryapi.api.dto.BookDTO;
 import br.com.elegacy.libraryapi.api.exception.ApiErrors;
-import br.com.elegacy.libraryapi.api.resource.dto.BookDTO;
 import br.com.elegacy.libraryapi.exception.BusinessException;
 import br.com.elegacy.libraryapi.model.entity.Book;
 import br.com.elegacy.libraryapi.service.BookService;

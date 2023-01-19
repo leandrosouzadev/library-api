@@ -1,4 +1,4 @@
-package br.com.elegacy.libraryapi.api.resource.dto;
+package br.com.elegacy.libraryapi.api.dto;
 
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
