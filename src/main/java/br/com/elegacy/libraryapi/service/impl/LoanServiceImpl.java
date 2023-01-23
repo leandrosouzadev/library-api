@@ -36,13 +36,14 @@ public class LoanServiceImpl implements LoanService {
 	}
 
 	@Override
-	public Loan update(Loan loan) {		
+	public Loan update(Loan loan) {
 		return this.loanRepository.save(loan);
 	}
 
 	@Override
-	public Page<Loan> find(LoanFilterDTO loanFilterDTO, Pageable pageable) {	
-		return null;
+	public Page<Loan> find(LoanFilterDTO loanFilterDTO, Pageable pageable) {
+		return this.loanRepository.findByBookIsbnOrCustomer(loanFilterDTO.getIsbn(), loanFilterDTO.getCustomer(),
+				pageable);
 	}
 
 }
