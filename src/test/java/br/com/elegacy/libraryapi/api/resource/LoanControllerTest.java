@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.elegacy.libraryapi.api.dto.LoanDTO;
+import br.com.elegacy.libraryapi.api.dto.ReturnedLoanDTO;
 import br.com.elegacy.libraryapi.exception.BusinessException;
 import br.com.elegacy.libraryapi.model.entity.Book;
 import br.com.elegacy.libraryapi.model.entity.Loan;
@@ -151,6 +152,35 @@ class LoanControllerTest {
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("errors", Matchers.hasSize(1)))
 				.andExpect(jsonPath("errors[0]").value("Book already loaned."));
+	}
+
+	@Test
+	@DisplayName("Should return a book")
+	void shouldReturnBook() throws Exception {
+		// Given
+		ReturnedLoanDTO returnedLoanDTO = ReturnedLoanDTO.builder().returned(true).build();
+		String json = new ObjectMapper().writeValueAsString(returnedLoanDTO);
+		
+		Loan loan = Loan.builder()
+				.id(1L)
+				.build();
+		
+		BDDMockito.given(loanService.getById(Mockito.anyLong()))
+		.willReturn(Optional.of(loan));
+
+		// When
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+				.patch(LOAN_API.concat("/1"))
+				.content(json)
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON);
+
+		// Then
+
+		mockMvc.perform(request)
+				.andExpect(status().isOk());
+		
+		Mockito.verify(loanService, Mockito.times(1)).update(loan);
 	}
 
 }
