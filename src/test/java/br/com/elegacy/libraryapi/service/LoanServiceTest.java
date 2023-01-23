@@ -6,6 +6,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -102,4 +103,43 @@ class LoanServiceTest {
 
 	}
 
+	@Test
+	@DisplayName("Should get loan information by id")
+	void shouldGetLoanInformationById() {
+		// Arrange
+		Long id = 1L;
+		
+		Loan loan = createLoan();
+		loan.setId(id);
+		
+		Mockito.when(loanRepository.findById(id)).thenReturn(Optional.of(loan));
+		
+		// Act
+		Optional<Loan> result = loanService.getById(id);
+		
+		// Assert
+		assertThat(result).isPresent();		
+		assertThat(result.get().getId()).isEqualTo(id);		
+		assertThat(result.get().getCustomer()).isEqualTo(loan.getCustomer());		
+		assertThat(result.get().getBook()).isEqualTo(loan.getBook());		
+		assertThat(result.get().getLoanDate()).isEqualTo(loan.getLoanDate());		
+		
+		verify(loanRepository).findById(id);
+	}
+	
+	private Loan createLoan() {
+		Book book = Book.builder()
+				.id(1L)
+				.build();
+
+		String customer = "Jhon";
+
+		Loan savingLoan = Loan.builder()
+				.book(book)
+				.customer(customer)
+				.loanDate(LocalDate.now())
+				.build();
+		
+		return savingLoan;
+	}
 }
