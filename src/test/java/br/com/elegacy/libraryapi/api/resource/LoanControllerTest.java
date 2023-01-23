@@ -160,13 +160,13 @@ class LoanControllerTest {
 		// Given
 		ReturnedLoanDTO returnedLoanDTO = ReturnedLoanDTO.builder().returned(true).build();
 		String json = new ObjectMapper().writeValueAsString(returnedLoanDTO);
-		
+
 		Loan loan = Loan.builder()
 				.id(1L)
 				.build();
-		
+
 		BDDMockito.given(loanService.getById(Mockito.anyLong()))
-		.willReturn(Optional.of(loan));
+				.willReturn(Optional.of(loan));
 
 		// When
 		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
@@ -179,8 +179,30 @@ class LoanControllerTest {
 
 		mockMvc.perform(request)
 				.andExpect(status().isOk());
-		
+
 		Mockito.verify(loanService, Mockito.times(1)).update(loan);
+	}
+
+	@Test
+	@DisplayName("Should not return a non-existent book")
+	void shouldNotReturnNonExistentBook() throws Exception {
+		// Given
+		ReturnedLoanDTO returnedLoanDTO = ReturnedLoanDTO.builder().returned(true).build();
+		String json = new ObjectMapper().writeValueAsString(returnedLoanDTO);
+
+		BDDMockito.given(loanService.getById(Mockito.anyLong())).willReturn(Optional.empty());
+
+		// When
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+				.patch(LOAN_API.concat("/1"))
+				.content(json)
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON);
+
+		// Then
+
+		mockMvc.perform(request)
+				.andExpect(status().isNotFound());
 	}
 
 }
