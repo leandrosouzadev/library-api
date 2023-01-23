@@ -2,7 +2,11 @@ package br.com.elegacy.libraryapi.api.resource;
 
 import java.time.LocalDate;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import br.com.elegacy.libraryapi.api.dto.LoanDTO;
+import br.com.elegacy.libraryapi.api.dto.LoanFilterDTO;
 import br.com.elegacy.libraryapi.api.dto.ReturnedLoanDTO;
 import br.com.elegacy.libraryapi.model.entity.Book;
 import br.com.elegacy.libraryapi.model.entity.Loan;
@@ -53,5 +58,12 @@ public class LoanController {
 		
 		loan.setReturned(returnedLoanDTO.getReturned());		
 		loanService.update(loan);
+	}
+	
+	@GetMapping
+	public Page<LoanDTO> find(LoanFilterDTO loanFilterDTO, Pageable pageable) {
+		Page<Loan> result = loanService.find(loanFilterDTO, pageable);
+		
+		return null;
 	}
 }

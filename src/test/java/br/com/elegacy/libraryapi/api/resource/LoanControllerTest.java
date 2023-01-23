@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.hamcrest.Matchers;
@@ -16,6 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -25,6 +29,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.elegacy.libraryapi.api.dto.LoanDTO;
+import br.com.elegacy.libraryapi.api.dto.LoanFilterDTO;
 import br.com.elegacy.libraryapi.api.dto.ReturnedLoanDTO;
 import br.com.elegacy.libraryapi.exception.BusinessException;
 import br.com.elegacy.libraryapi.model.entity.Book;
@@ -205,4 +210,53 @@ class LoanControllerTest {
 				.andExpect(status().isNotFound());
 	}
 
+	
+	@Test
+	@DisplayName("Should find loans by filter")
+	void shouldFindLoansByFilter() throws Exception {
+		// Given
+		Long id = 1L;
+		
+		Loan loan = createLoan();
+		loan.setId(id);
+
+		BDDMockito.given(loanService.find(Mockito.any(LoanFilterDTO.class), Mockito.any(Pageable.class)))
+		.willReturn(new PageImpl<Loan>(Arrays.asList(loan), PageRequest.of(0, 10), 1));
+		
+		String queryString = String.format("?isbn=%s&customer=%s&page=0&size=100", 
+				loan.getBook().getIsbn(), loan.getCustomer());
+		
+		// When
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+				.get(LOAN_API.concat(queryString))
+				.accept(MediaType.APPLICATION_JSON);
+		
+		// Then
+		mockMvc.perform(request)
+		.andExpect(status().isOk())
+		.andExpect(jsonPath("content", Matchers.hasSize(1)))
+		.andExpect(jsonPath("totalElements").value(1))
+		.andExpect(jsonPath("pageable.pageSize").value(10))
+		.andExpect(jsonPath("pageable.pageNumber").value(0))
+		
+		;
+	}
+	
+	private Loan createLoan() {
+		Book book = Book.builder()
+				.id(1L)
+				.isbn("321")
+				.build();
+
+		String customer = "Jhon";
+
+		Loan savingLoan = Loan.builder()
+				.book(book)
+				.customer(customer)
+				.loanDate(LocalDate.now())
+				.build();
+		
+		return savingLoan;
+	}
+	
 }

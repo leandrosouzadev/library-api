@@ -2,8 +2,11 @@ package br.com.elegacy.libraryapi.service.impl;
 
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import br.com.elegacy.libraryapi.api.dto.LoanFilterDTO;
 import br.com.elegacy.libraryapi.exception.BusinessException;
 import br.com.elegacy.libraryapi.model.entity.Loan;
 import br.com.elegacy.libraryapi.model.repository.LoanRepository;
@@ -35,6 +38,11 @@ public class LoanServiceImpl implements LoanService {
 	@Override
 	public Loan update(Loan loan) {		
 		return this.loanRepository.save(loan);
+	}
+
+	@Override
+	public Page<Loan> find(LoanFilterDTO loanFilterDTO, Pageable pageable) {	
+		return null;
 	}
 
 }

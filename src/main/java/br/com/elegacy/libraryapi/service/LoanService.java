@@ -2,6 +2,10 @@ package br.com.elegacy.libraryapi.service;
 
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import br.com.elegacy.libraryapi.api.dto.LoanFilterDTO;
 import br.com.elegacy.libraryapi.model.entity.Loan;
 
 public interface LoanService {
@@ -11,5 +15,7 @@ public interface LoanService {
 	public Optional<Loan> getById(Long id);
 
 	public Loan update(Loan loan);
+
+	public Page<Loan> find(LoanFilterDTO loanFilterDTO, Pageable pageable);
 
 }
