@@ -17,7 +17,7 @@ public class ScheduleService {
 
 	private final LoanService loanService;
 	private final EmailService emailService;
-	
+
 	@Value("${application.mail.lateloans.message}")
 	private String message;
 
@@ -26,7 +26,7 @@ public class ScheduleService {
 		List<Loan> allLateLoans = loanService.getAllLateLoans();
 
 		List<String> mailsList = allLateLoans.stream()
-				.map(loan -> loan.getCustomerEmail())
+				.map(Loan::getCustomerEmail)
 				.toList();
 
 		emailService.sendMails(message, mailsList);
