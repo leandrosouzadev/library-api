@@ -1,5 +1,6 @@
 package br.com.elegacy.libraryapi.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -20,5 +21,7 @@ public interface LoanService {
 	public Page<Loan> find(LoanFilterDTO loanFilterDTO, Pageable pageable);
 
 	public Page<Loan> getLoansByBook(Book book, Pageable pageable);
+	
+	public List<Loan> getAllLateLoans();
 
 }

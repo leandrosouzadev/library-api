@@ -3,6 +3,7 @@ package br.com.elegacy.libraryapi.model.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ class LoanRepositoryTest {
 	@DisplayName("Should check if there is an unreturned loan for the book")
 	void shouldCheckUnreturnedLoanBook() {
 		// Arrange
-		Loan loan = createAndPersistLoan();
+		Loan loan = createAndPersistLoan(LocalDate.now());
 		Book book = loan.getBook();
 
 		// Act
@@ -44,7 +45,7 @@ class LoanRepositoryTest {
 	@DisplayName("Should find loan by book isbn or customer.")
 	void shouldFindLoanByBookIsbnOrCustomer() {
 		// Arrange
-		Loan loan = createAndPersistLoan();
+		Loan loan = createAndPersistLoan(LocalDate.now());
 
 		// Act
 		Page<Loan> result = loanRepository.findByBookIsbnOrCustomer("123", "Jhon", PageRequest.of(0, 10));
@@ -56,8 +57,34 @@ class LoanRepositoryTest {
 		assertThat(result.getPageable().getPageNumber()).isZero();
 		assertThat(result.getTotalElements()).isEqualTo(1);
 	}
+	
+	@Test
+	@DisplayName("Should find by loan date less than thre days ago and not returned")
+	void ShouldfindByLoanDateLessThanAndNotReturned() {
+		// Arrange
+		Loan loan = createAndPersistLoan(LocalDate.now().minusDays(5));
+		
+		// Act
+		List<Loan> result = loanRepository.findByLoanDateLessThanAndNotReturned(LocalDate.now().minusDays(4));
+		
+		// Assert
+		assertThat(result).hasSize(1).contains(loan);
+	}
+	
+	@Test
+	@DisplayName("Should not find by loan date less than thre days ago and not returned")
+	void ShouldNotfindByLoanDateLessThanAndNotReturned() {
+		// Arrange
+		createAndPersistLoan(LocalDate.now());
+		
+		// Act
+		List<Loan> result = loanRepository.findByLoanDateLessThanAndNotReturned(LocalDate.now().minusDays(4));
+		
+		// Assert
+		assertThat(result).isEmpty();
+	}
 
-	private Loan createAndPersistLoan() {
+	private Loan createAndPersistLoan(LocalDate loanDate) {
 		Book book = Book.builder()
 				.title("Adventures")
 				.author("Arthur")
@@ -67,7 +94,7 @@ class LoanRepositoryTest {
 		Loan loan = Loan.builder()
 				.book(book)
 				.customer("Jhon")
-				.loanDate(LocalDate.now())
+				.loanDate(loanDate)
 				.build();
 
 		testEntityManager.persist(book);
