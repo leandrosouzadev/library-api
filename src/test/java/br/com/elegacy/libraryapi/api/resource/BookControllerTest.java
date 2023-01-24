@@ -30,6 +30,7 @@ import br.com.elegacy.libraryapi.api.dto.BookDTO;
 import br.com.elegacy.libraryapi.exception.BusinessException;
 import br.com.elegacy.libraryapi.model.entity.Book;
 import br.com.elegacy.libraryapi.service.BookService;
+import br.com.elegacy.libraryapi.service.LoanService;
 
 @ActiveProfiles("test")
 @WebMvcTest(controllers = BookController.class)
@@ -43,6 +44,9 @@ class BookControllerTest {
 
 	@MockBean
 	private BookService bookService;
+	
+	@MockBean
+	private LoanService loanService;
 
 	@Test
 	@DisplayName("Should create a successful book.")

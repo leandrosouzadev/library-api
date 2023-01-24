@@ -59,6 +59,7 @@ class LoanControllerTest {
 		// Given
 		LoanDTO loanDTO = LoanDTO.builder()
 				.isbn("123")
+				.email("customer@email.com")
 				.customer("Jhon")
 				.build();
 

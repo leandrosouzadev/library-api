@@ -7,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,10 +32,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BookController {
 
-	private BookService bookService;
-	private ModelMapper modelMapper;
-	private LoanService loanService;
-
+	private final BookService bookService;	
+	private final LoanService loanService;	
+	private final ModelMapper modelMapper;
+	
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public BookDTO create(@Valid @RequestBody BookDTO bookDTO) {
@@ -108,7 +107,7 @@ public class BookController {
 					loanDTO.setBook(bookDTO);
 					return loanDTO;
 				}).toList();
-		
+
 		return new PageImpl<>(list, pageable, result.getTotalElements());
 	}
 }
