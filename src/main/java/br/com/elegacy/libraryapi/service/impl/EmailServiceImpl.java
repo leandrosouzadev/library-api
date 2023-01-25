@@ -8,12 +8,14 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import br.com.elegacy.libraryapi.service.EmailService;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
 
+	@NonNull
 	private final JavaMailSender javaMailSender;
 
 	@Value("${application.mail.default-remetent}")
@@ -23,7 +25,7 @@ public class EmailServiceImpl implements EmailService {
 	public void sendMails(String message, List<String> mailsList) {
 		String[] mails = mailsList.toArray(new String[mailsList.size()]);
 
-		SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+		SimpleMailMessage simpleMailMessage = new SimpleMailMessage();		
 		simpleMailMessage.setFrom(remetent);
 		simpleMailMessage.setSubject("Book with overdue loan.");
 		simpleMailMessage.setText(message);
