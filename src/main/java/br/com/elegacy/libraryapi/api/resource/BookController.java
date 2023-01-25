@@ -24,20 +24,26 @@ import br.com.elegacy.libraryapi.model.entity.Book;
 import br.com.elegacy.libraryapi.model.entity.Loan;
 import br.com.elegacy.libraryapi.service.BookService;
 import br.com.elegacy.libraryapi.service.LoanService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/books")
 @RequiredArgsConstructor
+@Tag(name = "Book API")
 public class BookController {
 
-	private final BookService bookService;	
-	private final LoanService loanService;	
+	private final BookService bookService;
+	private final LoanService loanService;
 	private final ModelMapper modelMapper;
-	
+
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
+	@Operation(description = "Create a book")
 	public BookDTO create(@Valid @RequestBody BookDTO bookDTO) {
 		Book book = modelMapper.map(bookDTO, Book.class);
 
@@ -47,6 +53,7 @@ public class BookController {
 	}
 
 	@GetMapping("{id}")
+	@Operation(description = "Obtains a book details by id")
 	public BookDTO get(@PathVariable Long id) {
 		return bookService
 				.getById(id)
@@ -56,6 +63,9 @@ public class BookController {
 
 	@DeleteMapping("{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@Operation(description = "Deletes a book by id")
+	@ApiResponse(responseCode = "204", description = "Book succesfully deleted")
+	@ApiResponse(responseCode = "400", description = "Book not found")
 	public void delete(@PathVariable Long id) {
 		Book book = bookService
 				.getById(id)
@@ -65,6 +75,7 @@ public class BookController {
 	}
 
 	@PutMapping("{id}")
+	@Operation(description = "Updates a book")
 	public BookDTO update(@PathVariable Long id, @RequestBody BookDTO bookDTO) {
 		return bookService
 				.getById(id).map(book -> {
@@ -81,6 +92,7 @@ public class BookController {
 	}
 
 	@GetMapping
+	@Operation(description = "Find books by params")
 	public Page<BookDTO> find(BookDTO bookDTO, Pageable pageRequest) {
 		Book filter = modelMapper.map(bookDTO, Book.class);
 		Page<Book> result = bookService.find(filter, pageRequest);
