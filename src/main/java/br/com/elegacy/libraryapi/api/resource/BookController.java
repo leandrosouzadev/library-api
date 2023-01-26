@@ -29,11 +29,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/books")
 @RequiredArgsConstructor
 @Tag(name = "Book API")
+@Slf4j
 public class BookController {
 
 	private final BookService bookService;
@@ -44,6 +46,8 @@ public class BookController {
 	@ResponseStatus(HttpStatus.CREATED)
 	@Operation(description = "Create a book")
 	public BookDTO create(@Valid @RequestBody BookDTO bookDTO) {
+		log.info(" creating a book for isbn: {}", bookDTO.getIsbn());
+		
 		Book book = modelMapper.map(bookDTO, Book.class);
 
 		book = bookService.save(book);
@@ -54,6 +58,8 @@ public class BookController {
 	@GetMapping("{id}")
 	@Operation(description = "Obtains a book details by id")
 	public BookDTO get(@PathVariable Long id) {
+		log.info(" obtaining details for book id: {}", id);
+		
 		return bookService
 				.getById(id)
 				.map(book -> modelMapper.map(book, BookDTO.class))
@@ -66,6 +72,8 @@ public class BookController {
 	@ApiResponse(responseCode = "204", description = "Book succesfully deleted")
 	@ApiResponse(responseCode = "400", description = "Book not found")
 	public void delete(@PathVariable Long id) {
+		log.info(" delete book of id: {}", id);
+		
 		Book book = bookService
 				.getById(id)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -76,6 +84,8 @@ public class BookController {
 	@PutMapping("{id}")
 	@Operation(description = "Updates a book")
 	public BookDTO update(@PathVariable Long id, @RequestBody BookDTO bookDTO) {
+		log.info(" update book of id: {}", id);
+		
 		return bookService
 				.getById(id).map(book -> {
 
